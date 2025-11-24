@@ -1,0 +1,36 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: dmoj_root_pass
+      MYSQL_DATABASE: dmoj
+      MYSQL_USER: dmoj_user
+      MYSQL_PASSWORD: dmoj_password
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  dmoj-site:
+    build: .
+    depends_on:
+      - mariadb
+      - redis
+    environment:
+      DATABASE_HOST: mariadb
+      DATABASE_NAME: dmoj
+      DATABASE_USER: dmoj_user
+      DATABASE_PASSWORD: dmoj_password
+      REDIS_HOST: redis
+    ports:
+      - "8020:80"
+    volumes:
+      - ./site:/usr/local/app/site 
+    restart: always
